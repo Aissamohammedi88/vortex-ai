@@ -1,0 +1,94 @@
+import polars as pl
+train = pl.read_csv('/kaggle/input/nvidia-nemotron-3-reasoning-challenge/train.csv')
+
+train.head()
+shape: (5, 3)
+id prompt answer
+str str str
+"00066667" "In Alice's Wonderland, a secre… "10010111"
+"000b53cf" "In Alice's Wonderland, a secre… "01000011"
+"00189f6a" "In Alice's Wonderland, secret … "cat imagines book"
+"001b24c4" "In Alice's Wonderland, numbers… "XXXVIII"
+"001c63cb" "In Alice's Wonderland, secret … "wizard creates secret"
+import site
+
+cutlass_pkg_path = "/kaggle/usr/lib/notebooks/ryanholbrook/nvidia-utility-script/nvidia_cutlass_dsl/python_packages/"
+site.addsitedir(cutlass_pkg_path)
+
+import kagglehub
+import mamba_ssm
+import torch
+from peft import LoraConfig, get_peft_model, get_peft_model_state_dict, TaskType
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Configuration
+MODEL_PATH = kagglehub.model_download("metric/nemotron-3-nano-30b-a3b-bf16/transformers/default")
+OUTPUT_DIR = "/kaggle/working"
+LORA_RANK = 32 # Can be set to a maximum of 32
+
+model = AutoModelForCausalLM.from_pretrained(
+MODEL_PATH,
+device_map="auto",
+trust_remote_code=True,
+dtype=torch.bfloat16
+)
+# tokenizer = AutoTokenizer.from_pretrained(MODEL_PATH, trust_remote_code=True)
+print("Model loaded successfully.")
+
+# Initialize LoRA Adapter
+print(f"Initializing LoRA adapter with rank={LORA_RANK}...")
+lora_config = LoraConfig(
+r=LORA_RANK,
+lora_alpha=16,
+target_modules=r".*\.(in_proj|out_proj|up_proj|down_proj)$",
+lora_dropout=0.05,
+bias="none",
+task_type=TaskType.CAUSAL_LM,
+)
+
+# Apply LoRA to the model
+model = get_peft_model(model, lora_config)
+model.print_trainable_parameters()
+
+
+# YOUR CODE HERE
+# --------------
+# model.train()
+# --------------
+
+
+# Save Adapter
+print(f"Saving adapter to {OUTPUT_DIR}...")
+model.save_pretrained(OUTPUT_DIR)
+/kaggle/usr/lib/notebooks/ryanholbrook/nvidia-utility-script/torch/compiler/__init__.py:148: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+return torch._dynamo.allow_in_graph(fn)
+Model loaded successfully.
+Initializing LoRA adapter with rank=32...
+/usr/local/lib/python3.12/dist-packages/torchao/float8/float8_tensor.py:122: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+@torch._dynamo.allow_in_graph
+/usr/local/lib/python3.12/dist-packages/torchao/float8/float8_tensor.py:195: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+@torch._dynamo.allow_in_graph
+/usr/local/lib/python3.12/dist-packages/torchao/float8/float8_scaling_utils.py:90: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+@torch._dynamo.allow_in_graph
+/usr/local/lib/python3.12/dist-packages/torchao/float8/float8_linear.py:60: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+@torch._dynamo.allow_in_graph
+/usr/local/lib/python3.12/dist-packages/torchao/dtypes/nf4tensor.py:1059: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+@torch._dynamo.allow_in_graph
+/usr/local/lib/python3.12/dist-packages/torchao/quantization/subclass.py:206: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+@torch._dynamo.allow_in_graph
+/usr/local/lib/python3.12/dist-packages/torchao/quantization/subclass.py:355: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+@torch._dynamo.allow_in_graph
+/usr/local/lib/python3.12/dist-packages/torchao/quantization/subclass.py:392: FutureWarning: torch._dynamo.allow_in_graph is deprecated and will be removed in a future version. Use torch._dynamo.nonstrict_trace instead.
+@torch._dynamo.allow_in_graph
+trainable params: 880,138,240 || all params: 32,458,075,584 || trainable%: 2.7116
+Saving adapter to /kaggle/working...
+import subprocess
+
+subprocess.run("zip -m submission.zip *", shell=True, check=True)
+adding: README.md (deflated 66%)
+adding: _notebook_.ipynb (deflated 75%)
+adding: adapter_config.json (deflated 55%)
+adding: adapter_model.safetensors (deflated 77%)
+CompletedProcess(args='zip -m submission.zip *', returncode=0)
+linkcode
+print('Done.')
