@@ -1,18 +1,76 @@
-# Build and Release Folders
-bin-debug/
-bin-release/
-[Oo]bj/
-[Bb]in/
 
-# Other files and folders
-.settings/
+---
 
-# Executables
-*.swf
-*.air
-*.ipa
-*.apk
+### 📄 `.gitignore`
 
-# Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
-# should NOT be excluded as they contain compiler settings and other important
-# information for Eclipse / Flash Builder.
+```gitignore
+# ═══════════════════════════════════════════════════════════════════
+# VORTEX IA — .gitignore
+# ═══════════════════════════════════════════════════════════════════
+
+# --- SYSTÈME D'EXPLOITATION & ÉDITEURS ---
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+.vs/
+
+# --- PYTHON (Exécution & Cache) ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# --- ENVIRONNEMENTS VIRTUELS (Isolation Souveraine) ---
+.venv/
+venv/
+ENV/
+env/
+.python-version
+
+# --- SÉCURITÉ (Zéro fuite de secrets) ---
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+secrets.json
+config.local.json
+
+# --- ARTEFACTS DE TEST & LOGS ---
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# --- BASES DE DONNÉES LOCALES ---
+*.db
+*.sqlite3
+*.sqlite
